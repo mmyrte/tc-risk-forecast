@@ -1,6 +1,7 @@
 # DB Setup and Data Preparation
 
-The database that I'm using is [PostgreSQL](https://www.postgresql.org/) v12 with the [PostGIS](https://postgis.net/) and [h3-pg](https://github.com/bytesandbrains/h3-pg) extensions. A nice way of getting that up and running locally on macos is using the [Postgres.app](https://postgresapp.com/), but you're not constrained regarding the platform.
+The database that I'm using is [PostgreSQL](https://www.postgresql.org/) v12 with the [PostGIS](https://postgis.net/) extension. A nice way of getting that up and running locally on macos is using the [Postgres.app](https://postgresapp.com/), but you're not constrained regarding the platform.
+The `sally_impact_v` view requires the [h3-pg](https://github.com/bytesandbrains/h3-pg) extension.
 
 The schema described below can also be found in [schema-tcrisk.sql](schema-tcrisk.sql) without the long explanations in between. Since there are dependencies that cannot be met by merely running a sql script, you should follow the instructions here first and only then run the schema in the indicated chunks.
 
