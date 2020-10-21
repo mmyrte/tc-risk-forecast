@@ -14,7 +14,7 @@ In the course of my master's thesis at [ETHZ WCR](https://wcr.ethz.ch/) and [Red
 
 A short description of the components follows. It's probably good to have a rough understanding of CLIMADA and relational databases.
 
-###CLIMADA / Python
+### CLIMADA / Python
 
 The forecast is run from a Python script ([process_locally.py](process_locally.py), imports [auxiliary_funs.py](auxiliary_funs.py)), which fetches TC forecast tracks from ECMWF, inserts the metadata into a DB table, uses each track's extent to fetch an exposure GeoDataFrame, and then calculate a wind speed for each exposure coordinate and time step. This is then written into a time series table. 
 
