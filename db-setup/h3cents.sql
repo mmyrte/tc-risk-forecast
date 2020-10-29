@@ -12,7 +12,7 @@ create temp table h3cents_tmp0 (
 );
 
 copy h3cents_tmp0 (idx)
-from '~/somedir/h3cents_res6.txt'
+from '/wcr/jhartman/h3-centroids/idxs_res6.csv'
 csv header;
 
 /*
@@ -58,8 +58,19 @@ from
 where
   tmp1.idx = tmp2.idx::h3index;
 
+/*
+  insert into operational table, don't need more than this. 
+  boundaries only needed for exposure aggregation.
+*/
+create table centroids_t as
+select
+  idx, centroid as geom, dist_coast
+from
+  h3cents_t;
 
-
+/*
+  add polyfill
+*/
 with
 idxsets as (
   select 
@@ -97,5 +108,10 @@ where ne_h3_t.id = idxcomparray.id
 
 select id, iso_a3, cardinality(h3_array) from ne_h3_t order by cardinality;
 
--- check containment with <@ commutator
-select iso_a3 from ne_h3_t where '871f8a862ffffff'::h3index <@ any(h3_array);
+-- check containment with <@ commutator, equality with = 
+-- necessary because an index doesn't contain itself
+select iso_a3 from ne_h3_t 
+where 
+  '871f8a862ffffff'::h3index <@ any(h3_array)
+  or '8600416f7ffffff'::h3index = any(h3_array)
+  ;

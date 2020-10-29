@@ -6,7 +6,7 @@
 */
 
 /*
-  geographic structures: populate centroids_t from a (possibly resampled)
+  geographic structures: populate h3cents_t from a (possibly resampled)
   version of the NASA distance to coast dataset
   https://oceancolor.gsfc.nasa.gov/docs/distfromcoast/ using some
   raster-to-point conversion tool. the ne_id is a foreign key to the Natural
@@ -21,28 +21,18 @@
   
   And yes, that URL's supposed to look like that.
 */
-create table public.centroids_t (
-    id serial
-  , geom public.geometry(point,4326)
-  , dist_coast numeric
-  , ne_id serial
-  , primary key (id)
-  , foreign key (ne_id) references public.ne_10m_admin0_t(gid)
-);
 
--- create the indexes only after importing the data!
-create index centroids_t_geom_idx on public.centroids_t using gist (geom);
-create index centroids_t_idx on public.centroids_t using btree (id);
-
--- exposure values from litpop - sampled using R's raster::extract at the
--- points from centroids_t
-create table public.litpop_values_t (
+/*
+exposure values from litpop - sampled using R's raster::extract at the
+points from centroids_t
+create table public.population_t (
     id integer
   , litpop double precision
   , foreign key (id) references public.centroids_t(id)
 );
 
 create index litpop_values_idx on public.litpop_values_t using btree (id);
+*/
 
 -- storm metadata
 create table public.fcast_storms_t (
@@ -58,7 +48,7 @@ create table public.fcast_storms_t (
   , primary key (id)
 );
 
-create index fcast_storms_idx on public.centroids_t using btree (id);
+create index fcast_storms_idx on public.fcast_storms_t using btree (id);
 
 -- time series metadata
 create table public.fcast_type_t (
@@ -74,22 +64,26 @@ insert into public.fcast_type_t ("type", description)
 values ('hazard', 'tc wind in m/s')
 ;
 
+
 -- time series
 create table public.fcast_series_t (
-    centroid_id integer
+    centroid_idx h3index
   , storm_id integer
   , type_id smallint
   , "value" numeric
   , "timestamp" timestamp without time zone
-  , foreign key (centroid_id) references public.centroids_t(id)
+  , foreign key (centroid_idx) references public.centroids_t(idx)
   , foreign key (storm_id) references public.fcast_storms_t(id)
   , foreign key (type_id) references public.fcast_type_t(id)
 );
 
--- actually, these indexes get recreated after each bulk insert from the
--- staging table; possibly inefficient as hell, but i'm not going to learn to
--- use NoSQL for my thesis
-create index fcast_series_centroid_idx on public.fcast_series_t using btree (centroid_id);
+/*
+  actually, these indexes get recreated after each bulk insert from the
+  staging table; possibly inefficient as hell, but i'm not going to learn to
+  use NoSQL for my thesis (would fit a format with e.g. one file per storm and
+  forecast timestamp)
+*/
+create index fcast_series_centroid_idx on public.fcast_series_t using btree (centroid_idx);
 create index fcast_series_storm_idx on public.fcast_series_t using btree (storm_id);
 
 create table public.fcast_series_staging_t (
@@ -217,3 +211,5 @@ from
 join 
   public.centroids_t c on (inten_agg.centroid_id = c.id)
 ;
+
+

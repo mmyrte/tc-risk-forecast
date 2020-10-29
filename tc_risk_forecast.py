@@ -6,8 +6,9 @@ date: 2020-09-06
 
 """
 
-import geopandas as gpd
 from io import StringIO
+
+import geopandas as gpd
 import numpy as np
 import pandas as pd
 import psycopg2
@@ -15,7 +16,7 @@ from psycopg2.sql import SQL, Identifier
 import h3.api.numpy_int as h3
 
 from climada.hazard.centroids import Centroids
-from climada.hazard.tc_tracks_forecast import TCForecast
+# from climada.hazard.tc_tracks_forecast import TCForecast
 from climada.hazard.trop_cyclone import TropCyclone
 
 
@@ -194,7 +195,7 @@ def process_trackset(tracks, dry_run=False):
 
     storm_meta, _ = tracks_to_db(tracks, con, dry_run)
 
-    _ = windfields_to_db(tc_hazard, tracks, storm_meta, con)
+    _ = windfields_to_db(tc_hazard, tracks, storm_meta, con, dry_run)
 
     con.close()
 
