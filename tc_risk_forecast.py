@@ -29,12 +29,12 @@ select
     centroid as geom, 
     dist_coast
 from 
-    h3cents_t 
+    centroids_t 
 where 
     idx = any(%s::h3index[]);
 """
 
-DSN = 'dbname=tcrisk'
+DSN = 'dbname=tcrisk port=57701 host=localhost'
 
 META_TABLE = 'fcast_storms_t'
 META_PTS_TABLE = 'fcast_storms_pts_t'

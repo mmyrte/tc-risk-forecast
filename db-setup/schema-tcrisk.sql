@@ -50,6 +50,16 @@ create table public.fcast_storms_t (
 
 create index fcast_storms_idx on public.fcast_storms_t using btree (id);
 
+create table public.fcast_storms_pts_t (
+    id int8,
+    time timestamp,
+    geom geometry(Point),
+    foreign key (id) references public.fcast_storms_t(id)
+);
+
+create index fcast_storms_pts_t_idx on public.fcast_storms_pts_t using btree (id);
+create index fcast_storms_pts_t_geoidx on public.fcast_storms_pts_t using gist (geom);
+
 -- time series metadata
 create table public.fcast_type_t (
     id smallserial
@@ -87,7 +97,7 @@ create index fcast_series_centroid_idx on public.fcast_series_t using btree (cen
 create index fcast_series_storm_idx on public.fcast_series_t using btree (storm_id);
 
 create table public.fcast_series_staging_t (
-    centroid_id integer
+    centroid_id h3index
   , storm_id integer
   , type_id smallint
   , value numeric
@@ -211,5 +221,3 @@ from
 join 
   public.centroids_t c on (inten_agg.centroid_id = c.id)
 ;
-
-

@@ -10,11 +10,13 @@ import argparse
 import logging
 from multiprocessing import Pool
 
-from auxiliary_funs import process_one_storm
 from climada.hazard.tc_tracks_forecast import TCForecast
 import numpy as np
 import psycopg2
 import tqdm
+from tc_risk_forecast import process_trackset, DSN
+
+NUM_PROC = 20
 
 tclogger = logging.getLogger('climada.hazard.trop_cyclone')
 tclogger.setLevel(logging.WARNING)
@@ -34,13 +36,13 @@ tracks_per_sid = [
     fcast.subset({'sid': sid}) for sid in sids
 ]
 
-with Pool(6) as pool:
+with Pool(NUM_PROC) as pool:
     res = list(tqdm.tqdm(
-        pool.imap(process_one_storm, tracks_per_sid),
+        pool.imap(process_trackset, tracks_per_sid),
         total=len(tracks_per_sid)
     ))
 
-con = psycopg2.connect(dbname='tcrisk')
+con = psycopg2.connect(DSN)
 
 with con.cursor() as c:
     c.execute('drop index fcast_series_centroid_idx;')
