@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """This script generates the windfield data required for my master's thesis
 
 auth: jhartman
