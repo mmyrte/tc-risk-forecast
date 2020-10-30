@@ -86,14 +86,14 @@ def _fetch_centroids(tracks, con):
     buffer = gdf.geometry\
                 .buffer(distance=TRACK_BUFFER, resolution=2)\
                 .unary_union
-    
+
     # in case the buffer is a multipolygon, needs polyfill per polygon
     if isinstance(buffer, Polygon):
         buffer = [buffer]
-        
+
     h3indices = np.concatenate([
-        h3.polyfill(poly.__geo_interface__, H3_LEVEL, True) 
-        for poly in list(buffer)    
+        h3.polyfill(poly.__geo_interface__, H3_LEVEL, True)
+        for poly in list(buffer)
     ])
 
     h3indices = list(map(h3.h3_to_string, h3indices))
@@ -199,6 +199,7 @@ def windfields_to_db(tc_hazard, tracks, storm_meta, con, dry_run=False):
 
     intensity_t = pd.concat(intensity_dfs)  # concat list of dfs
     intensity_t['type_id'] = INTENSITY_SERIES_TYPE
+    intensity_t.centroid_id = intensity_t.centroid_id.apply(h3.h3_to_string)
 
     if not dry_run:
         df_to_postgres(intensity_t, con, SERIES_STAGING)
