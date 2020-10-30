@@ -23,7 +23,7 @@ INTENSITY_SERIES_TYPE = 1
 CENT_QUERY = """
 select 
     idx as centroid_id,
-    centroid as geom, 
+    geom, 
     dist_coast
 from 
     centroids_t 
