@@ -48,11 +48,9 @@ create table public.fcast_storms_t (
   , primary key (id)
 );
 
-create index fcast_storms_idx on public.fcast_storms_t using btree (id);
-
 create table public.fcast_storms_pts_t (
     id int8,
-    time timestamp,
+    "timestamp" timestamp,
     geom geometry(Point),
     foreign key (id) references public.fcast_storms_t(id)
 );
