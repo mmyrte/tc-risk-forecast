@@ -14,6 +14,7 @@ import pandas as pd
 import psycopg2
 from psycopg2.sql import SQL, Identifier
 import h3.api.numpy_int as h3
+from shapely.geometry.polygon import Polygon
 
 from climada.hazard import Centroids, TropCyclone
 
@@ -66,7 +67,6 @@ def process_trackset(tracks, dry_run=False):
 
     return 'sid {} done'.format(sid)
 
-
 def _fetch_centroids(tracks, con):
     """
     Fetches h3 centroids with their dist_coast data (and possibly exposure) from
@@ -82,11 +82,20 @@ def _fetch_centroids(tracks, con):
     Centroids
         with centroid_id set to h3index hex string representation
     """
-    tracks_gdf = tracks.to_geodataframe()
-    tracks_buffer = tracks_gdf.geometry\
-                              .buffer(distance=TRACK_BUFFER, resolution=2)\
-                              .unary_union
-    h3indices = h3.polyfill(tracks_buffer.__geo_interface__, H3_LEVEL, True)
+    gdf = tracks.to_geodataframe()
+    buffer = gdf.geometry\
+                .buffer(distance=TRACK_BUFFER, resolution=2)\
+                .unary_union
+    
+    # in case the buffer is a multipolygon, needs polyfill per polygon
+    if isinstance(buffer, Polygon):
+        buffer = [buffer]
+        
+    h3indices = np.concatenate([
+        h3.polyfill(poly.__geo_interface__, H3_LEVEL, True) 
+        for poly in list(buffer)    
+    ])
+
     h3indices = list(map(h3.h3_to_string, h3indices))
 
     centroids_gdf = gpd.read_postgis(CENT_QUERY, con, params=(h3indices,))
