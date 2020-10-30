@@ -49,9 +49,12 @@ def process_trackset(tracks, dry_run=False):
     """Start separate process with separate postgres connection, calc windfield
     and push it to postgres."""
     con = psycopg2.connect(DSN)
+    sid = tracks.data[0].sid
 
     # fetch a subset of centroids
     centroids = _fetch_centroids(tracks, con)
+    if not centroids.coord.size:
+        return 'sid {} had empty centroids'.format(sid)
 
     # calculate windfields
     tc_hazard = TropCyclone()
@@ -62,8 +65,6 @@ def process_trackset(tracks, dry_run=False):
     _ = windfields_to_db(tc_hazard, tracks, storm_meta, con, dry_run)
 
     con.close()
-
-    sid = tracks.data[0].sid
 
     return 'sid {} done'.format(sid)
 
