@@ -30,6 +30,7 @@ bufr_files = TCForecast.fetch_bufr_ftp(remote_dir=args.remote_dir)
 
 fcast = TCForecast()
 fcast.fetch_ecmwf(files=bufr_files)
+fcast.equal_timestep(3)  # interpolate to 3h steps from 6h
 
 sids = np.unique([storm.sid for storm in fcast.data])
 
@@ -56,9 +57,9 @@ with con.cursor() as c:
     con.commit()
 
     c.execute('create index fcast_series_centroid_idx'
-              ' on fcast_series_t(centroid_id int4_ops);')
+              ' on fcast_series_t(centroid_idx);')
     c.execute('create index fcast_series_storm_idx'
-              ' on fcast_series_t(storm_id int4_ops);')
+              ' on fcast_series_t(storm_id);')
     con.commit()
 
 con.close()
