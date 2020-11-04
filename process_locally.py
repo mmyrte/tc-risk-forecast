@@ -30,7 +30,11 @@ bufr_files = TCForecast.fetch_bufr_ftp(remote_dir=args.remote_dir)
 
 fcast = TCForecast()
 fcast.fetch_ecmwf(files=bufr_files)
-fcast.equal_timestep(3)  # interpolate to 3h steps from 6h
+
+# drop tracks with only one timestep
+fcast.data = [tr for tr in fcast.data if tr.time.size>1]
+# interpolate to 3h steps from the original 6h
+fcast.equal_timestep(3)
 
 sids = np.unique([storm.sid for storm in fcast.data])
 
